@@ -1,3 +1,4 @@
+import flask
 from flask import Flask
 
 from thesis_backend.api import azure_openai
@@ -10,12 +11,12 @@ app.register_blueprint(azure_openai.bp)
 
 
 @app.route("/", methods=["GET"])
-def home():
+def home() -> str:
     return """<h1>Hello World!</h1>"""
 
 
 @app.after_request
-def add_header(response):
+def add_header(response: flask.Response) -> flask.Response:
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response

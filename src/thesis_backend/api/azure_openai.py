@@ -16,9 +16,9 @@ bp = Blueprint("azure_openai", __name__)
 
 
 @bp.post("/prompt_azure_openai/function")
-def prompt_azure_openai_function():
+def prompt_azure_openai_function() -> tuple[dict[str, str], int]:
     try:
-        request_data = AzureFunctionPromptSchema().load(request.json)
+        request_data = AzureFunctionPromptSchema().load(request.get_json())
     except ValidationError as err:
         return {"error": err.normalized_messages()}, 400
 
@@ -29,13 +29,13 @@ def prompt_azure_openai_function():
         tool_choice=request_data.get("tool_choice"),
     )
 
-    return completion
+    return completion, 200
 
 
 @bp.post("/prompt_azure_openai/message")
-def prompt_azure_openai_message():
+def prompt_azure_openai_message() -> tuple[dict[str, str], int]:
     try:
-        request_data = AzureMessagePromptSchema().load(request.json)
+        request_data = AzureMessagePromptSchema().load(request.get_json())
     except ValidationError as err:
         return {"error": err.normalized_messages()}, 400
 
@@ -43,16 +43,16 @@ def prompt_azure_openai_message():
         model=request_data.get("model"), messages=request_data.get("messages")
     )
 
-    return {"response": response}
+    return {"response": response}, 200
 
 
 @bp.post("/prompt_azure_openai/image")
-def prompt_azure_openai_image():
+def prompt_azure_openai_image() -> tuple[dict[str, str], int]:
     try:
-        request_data = AzureImagePromptSchema().load(request.json)
+        request_data = AzureImagePromptSchema().load(request.get_json())
     except ValidationError as err:
         return {"error": err.normalized_messages()}, 400
 
     url = generate_image(prompt=request_data.get("prompt"))
 
-    return {"url": url}
+    return {"url": url}, 200

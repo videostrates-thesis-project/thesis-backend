@@ -3,7 +3,11 @@ import os
 from typing import Iterable
 
 from openai import AzureOpenAI
-from openai.types.chat import ChatCompletionMessageParam
+from openai.types.chat import (
+    ChatCompletionMessageParam,
+    ChatCompletionToolChoiceOptionParam,
+    ChatCompletionToolParam,
+)
 
 azure_client = AzureOpenAI(
     azure_endpoint="https://mirrorverse.openai.azure.com/",
@@ -15,8 +19,8 @@ azure_client = AzureOpenAI(
 def generate_function_call(
     model: str,
     messages: Iterable[ChatCompletionMessageParam],
-    functions: list[dict],
-    tool_choice: dict,
+    functions: Iterable[ChatCompletionToolParam],
+    tool_choice: ChatCompletionToolChoiceOptionParam,
 ) -> dict[str, str]:
     completion = azure_client.chat.completions.create(
         model=model,
@@ -25,9 +29,12 @@ def generate_function_call(
         tool_choice=tool_choice,
     )
 
-    return json.loads(
-        completion.choices[0].message.tool_calls[0].function.arguments
-    )
+    tool_calls = completion.choices[0].message.tool_calls
+
+    if tool_calls is None:
+        raise ValueError("No tool calls found in completion")
+
+    return json.loads(tool_calls[0].function.arguments)
 
 
 def generate_message(
@@ -38,7 +45,9 @@ def generate_message(
         messages=messages,
     )
 
-    return completion.choices[0].message.content
+    response = completion.choices[0].message.content
+
+    return response if response else ""
 
 
 def generate_image(prompt: str) -> str:
@@ -47,4 +56,6 @@ def generate_image(prompt: str) -> str:
         prompt=prompt,
     )
 
-    return image_response.data[0].url
+    url = image_response.data[0].url
+
+    return url if url else ""
