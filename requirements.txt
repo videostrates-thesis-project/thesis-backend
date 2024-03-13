@@ -20,5 +20,6 @@ flask
 ### Other ###
 openai
 vertexai
+marshmallow
 
 
