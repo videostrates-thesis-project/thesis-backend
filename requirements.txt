@@ -1,0 +1,24 @@
+# Uncomment what you need
+# Run `pip install -r requirements.txt` to install all dependencies
+
+### Data Science ###
+# numpy
+# pandas
+# matplotlib
+# scikit-learn
+# scipy
+
+### Machine Learning ###
+# tensorflow
+# keras
+# pytorch
+
+### Backend ###
+flask
+# gunicorn
+
+### Other ###
+openai
+vertexai
+
+

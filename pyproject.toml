@@ -1,0 +1,13 @@
+[tool.mypy]
+python_version = "3.10"
+exclude = ["docs", "test"]
+disallow_untyped_defs = true
+
+
+[[tool.mypy.overrides]]
+module = [
+    
+]
+disable_error_code = []
+ignore_missing_imports = true
+

@@ -1,0 +1,17 @@
+site_name: thesis_backend Documentation  # The name of your documentation site.
+
+nav:
+  - Home: index.md  # Navigation links and their associated Markdown files.
+  - Installation Guide: install.md
+  - User Guide: user-guide.md
+  - API Reference:
+      - Overview: api-overview.md
+      - Endpoints: api-endpoints.md
+
+theme:
+  name: readthedocs  # The theme you want to use (e.g., 'material', 'readthedocs', 'custom-theme').
+
+plugins:
+  - search  # Enable the search plugin for search functionality.
+
+dev_addr: 0.0.0.0:8000  # Specify the address and port for the development server.
