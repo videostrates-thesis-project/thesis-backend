@@ -1,7 +1,9 @@
 import json
 import os
+from typing import Iterable
 
 from openai import AzureOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 azure_client = AzureOpenAI(
     azure_endpoint="https://mirrorverse.openai.azure.com/",
@@ -11,7 +13,10 @@ azure_client = AzureOpenAI(
 
 
 def generate_function_call(
-    model: str, messages: json, functions: json, tool_choice: json
+    model: str,
+    messages: Iterable[ChatCompletionMessageParam],
+    functions: list[dict],
+    tool_choice: dict,
 ) -> dict[str, str]:
     completion = azure_client.chat.completions.create(
         model=model,
@@ -25,10 +30,9 @@ def generate_function_call(
     )
 
 
-def generate_message(model: str, messages: json) -> str:
-    print("model: ", model)
-    print("messages: ", messages)
-
+def generate_message(
+    model: str, messages: Iterable[ChatCompletionMessageParam]
+) -> str:
     completion = azure_client.chat.completions.create(
         model=model,
         messages=messages,

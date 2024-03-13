@@ -1,6 +1,6 @@
 from flask import Flask
 
-from src.thesis_backend.api import azure_openai
+from thesis_backend.api import azure_openai
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
