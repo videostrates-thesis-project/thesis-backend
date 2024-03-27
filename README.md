@@ -1,4 +1,15 @@
 # Thesis Backend
+This repository contains the backend for a prototype implementation for a master's thesis for Aarhus University, Department of Computer Science.
+More information in the main repository [videostrates-thesis-project/thesis-project](https://github.com/videostrates-thesis-project/thesis-project)
+
+## Development
+### Environment Variables
+Required environment variables are specified in `.env.example`. Copy this file to `.env` and fill in the values.
+
+### Running the Application
+- \[Optional\] Create a virtual environment
+- Install dependencies with `tools/install.sh`
+- Run the application with `python .\src\app.py`
 
 ## Tools
 
