@@ -1,5 +1,5 @@
 # Thesis Backend
-This repository contains the backend for a prototype implementation for a master's thesis for the Aarhus University, Department of Computer Science.
+This repository contains the backend for a prototype implementation for a master's thesis for Aarhus University, Department of Computer Science.
 More information in the main repository [videostrates-thesis-project/thesis-project](https://github.com/videostrates-thesis-project/thesis-project)
 
 ## Development
