@@ -5,13 +5,13 @@ from flask import Flask
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
-from thesis_backend.api import azure_openai
+from thesis_backend.api import llm
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
 
 # Register blueprints
-app.register_blueprint(azure_openai.bp)
+app.register_blueprint(llm.bp)
 
 
 @app.route("/", methods=["GET"])
