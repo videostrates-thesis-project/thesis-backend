@@ -18,6 +18,7 @@ flask
 # gunicorn
 
 ### Other ###
+python-dotenv==1.0.1
 openai
 vertexai
 marshmallow

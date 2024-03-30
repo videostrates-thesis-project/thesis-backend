@@ -1,5 +1,9 @@
+import os
+
 import flask
 from flask import Flask
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 from thesis_backend.api import llm
 
