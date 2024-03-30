@@ -9,6 +9,12 @@ from openai.types.chat import (
     ChatCompletionToolParam,
 )
 
+if "AZURE_OPENAI_KEY" not in os.environ:
+    raise ValueError(
+        "Azure OpenAI key not found in environment. "
+        "Please set it in the environment variable AZURE_OPENAI_KEY"
+    )
+
 azure_client = AzureOpenAI(
     azure_endpoint="https://mirrorverse.openai.azure.com/",
     api_key=os.getenv("AZURE_OPENAI_KEY"),

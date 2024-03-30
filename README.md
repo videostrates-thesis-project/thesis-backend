@@ -1,6 +1,14 @@
-# Thesis Backend
+# Python Project Template
+
+**Note** that Git Bash should be used on Windows to execute the bash scripts.
 
 ## Tools
+
+### Virtual Environment
+
+Run `tools/virtualenv.sh` to create a virtual environment.
+
+Run `tools/activate.sh` to activate the virtual environment.
 
 ### Dependencies
 
