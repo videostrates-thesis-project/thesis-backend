@@ -60,6 +60,9 @@ def generate_image(prompt: str) -> str:
     image_response = azure_client.images.generate(
         model="Dalle3",
         prompt=prompt,
+        size="1792x1024",
+        quality="hd",
+        response_format="url",
     )
 
     url = image_response.data[0].url
