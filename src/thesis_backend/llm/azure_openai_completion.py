@@ -33,6 +33,7 @@ def generate_function_call(
         messages=messages,
         tools=functions,
         tool_choice=tool_choice,
+        temperature=0.25,
     )
 
     tool_calls = completion.choices[0].message.tool_calls
@@ -49,6 +50,7 @@ def generate_message(
     completion = azure_client.chat.completions.create(
         model=model,
         messages=messages,
+        temperature=0.25,
     )
 
     response = completion.choices[0].message.content
