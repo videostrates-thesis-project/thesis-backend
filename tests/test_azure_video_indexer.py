@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from src.thesis_backend.api.azure_video_indexer import AzureVideoIndexer, VideoIndexerToken
+from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer, VideoIndexerToken
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
