@@ -14,13 +14,18 @@
 # pytorch
 
 ### Backend ###
-flask
+flask~=3.0.2
 # gunicorn
 
 ### Other ###
 python-dotenv==1.0.1
-openai
+python-dotenv~=1.0.1
+openai~=1.13.3
 vertexai
-marshmallow
+marshmallow~=3.21.1
 
 
+
+requests~=2.31.0
+pip~=21.2.4
+setuptools~=58.1.0
