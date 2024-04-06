@@ -9,7 +9,7 @@ from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVide
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 
-class TestAzureVideoCatalog(unittest.TestCase):
+class TestAzureVideoIndexer(unittest.TestCase):
     def setUp(self):
         self.account_id = os.environ.get("VIDEO_INDEXER_ACCOUNT_ID")
         self.primary_key = os.environ.get("VIDEO_INDEXER_PRIMARY_KEY")
@@ -20,7 +20,6 @@ class TestAzureVideoCatalog(unittest.TestCase):
     def test_get_access_token(self):
         azure_token = VideoIndexerToken(self.account_id, self.primary_key)
         token = azure_token.token
-        print(token)
         assert token is not None
         assert isinstance(token, str)
 
@@ -65,4 +64,3 @@ class TestAzureVideoCatalog(unittest.TestCase):
         assert isinstance(response, dict)
         assert "id" in response
         assert response["id"] == self.video_id
-

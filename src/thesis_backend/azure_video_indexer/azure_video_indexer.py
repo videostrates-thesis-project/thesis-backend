@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from typing import NamedTuple, Mapping
 
@@ -8,27 +10,41 @@ TOKEN_EXPIRATION = 59 * 60  # 59 minutes
 VIDEO_LIST_REFRESH = 1  # 1 second
 
 
+def with_auto_refresh(refresh_func: callable, refresh_interval: int) -> callable:
+    """
+    Decorator performing automatic refresh of the decorated function.
+    Intended to be used for properties that require periodic refresh, such as access tokens.
+    """
+
+    def inner(func: callable) -> callable:
+        def wrapper(self, *args, **kwargs):
+            next_refresh_time = self.__dict__.get("__next_refresh_time")
+            if not next_refresh_time or time.time() > next_refresh_time:
+                refresh_func(self)
+                self.__dict__["__next_refresh_time"] = time.time() + refresh_interval
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    return inner
+
+
 class VideoIndexerToken:
     def __init__(self, account_id: str, primary_key: str) -> None:
-        self.__account_id = account_id
-        self.__access_token = None
-        self.__access_token_expires = -1
-        self.__headers = {"Ocp-Apim-Subscription-Key": primary_key}
+        self.__account_id: str = account_id
+        self.__access_token: str = ""
+        self.__headers: dict[str, str] = {"Ocp-Apim-Subscription-Key": primary_key}
 
-    @property
-    def token(self) -> str:
-        current_time = time.time()
-        if self.__access_token is None or self.__access_token_expires < current_time:
-            token = self.__get_access_token()
-            self.__access_token = token
-            self.__access_token_expires = current_time + TOKEN_EXPIRATION
-        return self.__access_token
-
-    def __get_access_token(self) -> str:
+    def __refresh_access_token(self) -> None:
         url = f"https://api.videoindexer.ai/auth/{LOCATION}/Accounts/{self.__account_id}/AccessToken"
         query_params = {"allowEdit": "true"}
         response = requests.get(url, params=query_params, headers=self.__headers)
-        return response.json()
+        self.__access_token = response.json()
+
+    @property
+    @with_auto_refresh(refresh_func=__refresh_access_token, refresh_interval=TOKEN_EXPIRATION)
+    def token(self) -> str:
+        return self.__access_token
 
 
 class VideoStatus(NamedTuple):
@@ -43,7 +59,6 @@ class AzureVideoCatalog:
         self.__access_token = access_token
         self.__headers = {"Ocp-Apim-Subscription-Key": primary_key}
         self.__videos: Mapping[str, VideoStatus] = {}
-        self.__next_refresh = -1
 
     def __refresh_videos(self) -> None:
         url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos"
@@ -61,11 +76,8 @@ class AzureVideoCatalog:
         return
 
     @property
+    @with_auto_refresh(refresh_func=__refresh_videos, refresh_interval=VIDEO_LIST_REFRESH)
     def videos(self) -> Mapping[str, VideoStatus]:
-        current_time = time.time()
-        if self.__next_refresh < current_time:
-            self.__next_refresh = current_time + VIDEO_LIST_REFRESH
-            self.__refresh_videos()
         return self.__videos
 
 
