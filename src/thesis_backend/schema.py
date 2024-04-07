@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 
 
 class AzureImagePromptSchema(Schema):
@@ -32,4 +32,4 @@ class SearchedVideoSchema(Schema):
 
 class AzureVideoIndexerSearchSchema(Schema):
     query = fields.Str(required=True)
-    videos = fields.List(fields.Nested(SearchedVideoSchema()), required=True)
+    videos = fields.List(fields.Nested(SearchedVideoSchema()), required=True, validate=validate.Length(min=1))

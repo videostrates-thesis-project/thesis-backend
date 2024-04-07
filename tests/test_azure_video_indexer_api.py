@@ -97,6 +97,15 @@ class TestAPI(unittest.TestCase):
         assert response.status_code == 400
         assert "query" in json.loads(response.data)["error"]
 
+    def test_search_videos_empty_list(self):
+        # Define invalid request data (missing 'query' field)
+        request_data = {"query": "example_query", "videos": []}
+        response = self.client.get("/azure_video_indexer/search", json=request_data)
+        print(json.loads(response.data))
+
+        assert response.status_code == 400
+        assert "videos" in json.loads(response.data)["error"]
+
     def test_search_videos_missing_start(self):
         # Define invalid request data (missing 'query' field)
         request_data = {"query": "example_query", "videos": [{"url": "example_url", "end": 60}]}

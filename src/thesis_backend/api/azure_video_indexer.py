@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import os
 
-from flask import Blueprint, request
-from marshmallow import ValidationError
+from flask import Blueprint
 
 from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer
 from src.thesis_backend.azure_video_indexer.metadata import SearchedVideo
 from src.thesis_backend.schema import AzureVideoIndexerIndexSchema, AzureVideoIndexerStatusSchema, \
     AzureVideoIndexerSearchSchema
+from src.thesis_backend.utils.with_request_data import with_request_data
 
 bp = Blueprint("azure_video_indexer", __name__)
 
@@ -19,12 +19,8 @@ azure_video_indexer = AzureVideoIndexer(account_id, primary_key)
 
 
 @bp.post("/azure_video_indexer/index")
-def upload_video() -> tuple[dict[str, str], int]:
-    try:
-        request_data = AzureVideoIndexerIndexSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
+@with_request_data(AzureVideoIndexerIndexSchema())
+def upload_video(request_data) -> tuple[dict[str, str], int]:
     try:
         video_status = azure_video_indexer.upload_video(request_data.get("url"), request_data.get("name"))
     except Exception as e:
@@ -34,12 +30,8 @@ def upload_video() -> tuple[dict[str, str], int]:
 
 
 @bp.get("/azure_video_indexer/status")
-def get_videos_status() -> tuple[dict[str, dict[str, str]], int] | tuple[dict[str, str], int]:
-    try:
-        request_data = AzureVideoIndexerStatusSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
+@with_request_data(AzureVideoIndexerStatusSchema())
+def get_videos_status(request_data) -> tuple[dict[str, dict[str, str]], int] | tuple[dict[str, str], int]:
     try:
         videos_status = azure_video_indexer.get_videos_status(request_data.get("urls"))
     except Exception as e:
@@ -50,16 +42,9 @@ def get_videos_status() -> tuple[dict[str, dict[str, str]], int] | tuple[dict[st
 
 
 @bp.get("/azure_video_indexer/search")
-def search_videos() -> tuple[list[dict[str, str | dict]], int] | tuple[dict[str, str], int]:
-    try:
-        request_data = AzureVideoIndexerSearchSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
-    if len(request_data.get("videos", [])) == 0:
-        return {"error": "No videos to search"}, 400
+@with_request_data(AzureVideoIndexerSearchSchema())
+def search_videos(request_data) -> tuple[list[dict[str, str | dict]], int] | tuple[dict[str, str], int]:
     videos = [SearchedVideo(**video) for video in request_data.get("videos")]
-
     try:
         matches = azure_video_indexer.search(request_data.get("query"), videos)
     except Exception as e:

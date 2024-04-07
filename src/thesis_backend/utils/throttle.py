@@ -1,4 +1,5 @@
 import time
+from functools import wraps
 from typing import NamedTuple
 
 
@@ -18,9 +19,10 @@ def throttle(interval: int) -> callable:
     Intended to be throttle the number of requests to the Azure Video Indexer API.
     """
 
-    def inner(func: callable) -> callable:
+    def decorator(func: callable) -> callable:
         cache: dict[str, CacheEntry] = {}
 
+        @wraps(func)
         def wrapper(*args, **kwargs):
             nonlocal cache
             key = make_key(args, kwargs)
@@ -33,4 +35,4 @@ def throttle(interval: int) -> callable:
 
         return wrapper
 
-    return inner
+    return decorator

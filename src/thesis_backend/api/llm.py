@@ -1,6 +1,4 @@
-from flask import Blueprint, request
-from marshmallow import ValidationError
-import json
+from flask import Blueprint
 
 from src.thesis_backend.llm.azure_openai_completion import (
     generate_function_call,
@@ -15,17 +13,14 @@ from ..schema import (
     AzureImagePromptSchema,
     AzureMessagePromptSchema,
 )
+from ..utils.with_request_data import with_request_data
 
 bp = Blueprint("azure_openai", __name__)
 
 
 @bp.post("/prompt_azure_openai/function")
-def prompt_azure_openai_function() -> tuple[dict[str, str], int]:
-    try:
-        request_data = AzureFunctionPromptSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
+@with_request_data(AzureFunctionPromptSchema())
+def prompt_azure_openai_function(request_data) -> tuple[dict[str, str], int]:
     model = request_data.get("model")
 
     if "gemini" in model:
@@ -50,12 +45,8 @@ def prompt_azure_openai_function() -> tuple[dict[str, str], int]:
 
 
 @bp.post("/prompt_azure_openai/message")
-def prompt_azure_openai_message() -> tuple[dict[str, str], int]:
-    try:
-        request_data = AzureMessagePromptSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
+@with_request_data(AzureMessagePromptSchema())
+def prompt_azure_openai_message(request_data) -> tuple[dict[str, str], int]:
     model = request_data.get("model")
     if "gemini" in model:
         completion_fn = gemini_generate_message
@@ -72,12 +63,8 @@ def prompt_azure_openai_message() -> tuple[dict[str, str], int]:
 
 
 @bp.post("/prompt_azure_openai/image")
-def prompt_azure_openai_image() -> tuple[dict[str, str], int]:
-    try:
-        request_data = AzureImagePromptSchema().load(request.get_json())
-    except ValidationError as err:
-        return {"error": err.normalized_messages()}, 400
-
+@with_request_data(AzureImagePromptSchema())
+def prompt_azure_openai_image(request_data) -> tuple[dict[str, str], int]:
     url = generate_image(prompt=request_data.get("prompt"))
 
     return {"url": url}, 200
