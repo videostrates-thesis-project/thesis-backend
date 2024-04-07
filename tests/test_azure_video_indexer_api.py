@@ -55,10 +55,10 @@ class TestAPI(unittest.TestCase):
             "example_url",
             "Processing",
             0)
-        mock_azure_video_indexer.get_videos_status.return_value = [video_status]
+        mock_azure_video_indexer.get_videos_status.return_value = {video_status.url: video_status}
 
         request_data = {"urls": ["example_url"]}
-        response = self.client.get("/azure_video_indexer/status", json=request_data)
+        response = self.client.post("/azure_video_indexer/status", json=request_data)
 
         assert response.status_code == 200
         assert json.loads(response.data) == {"example_url": {

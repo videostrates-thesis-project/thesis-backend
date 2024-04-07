@@ -29,7 +29,7 @@ def upload_video(request_data) -> tuple[dict[str, str], int]:
     return video_status._asdict(), 200
 
 
-@bp.get("/azure_video_indexer/status")
+@bp.post("/azure_video_indexer/status")
 @with_request_data(AzureVideoIndexerStatusSchema())
 def get_videos_status(request_data) -> tuple[dict[str, dict[str, str]], int] | tuple[dict[str, str], int]:
     try:
@@ -37,7 +37,7 @@ def get_videos_status(request_data) -> tuple[dict[str, dict[str, str]], int] | t
     except Exception as e:
         return {"error": "Failed to get video status", "message": str(e)}, 500
 
-    response = {video.url: video._asdict() for video in videos_status}
+    response = {video.url: video._asdict() for video in videos_status.values()}
     return response, 200
 
 

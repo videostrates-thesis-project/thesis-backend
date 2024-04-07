@@ -65,6 +65,12 @@ class TestAzureVideoIndexer(unittest.TestCase):
         assert isinstance(video_status, tuple)
         assert video_status.url == self.video_big_buck_bunny
         assert isinstance(video_status.state, str)
+        # Check if the video was added to the video catalog. Accessing the private attribute to not make an API call
+        video = azure_video_indexer._AzureVideoIndexer__video_catalog._AzureVideoCatalog__videos[
+            self.video_big_buck_bunny]
+        assert video is not None
+        assert video.url == self.video_big_buck_bunny
+        assert video.state == video_status.state
 
     def test_upload_video_invalid_url(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
