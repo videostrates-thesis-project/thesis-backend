@@ -5,7 +5,7 @@ from typing import NamedTuple, Mapping, Sequence
 import requests
 
 from src.thesis_backend.azure_video_indexer.metadata import MetadataStore, MetadataSegment, MetadataCollection, \
-    SearchQuery, SearchResult
+    SearchResult, SearchedVideo
 from src.thesis_backend.utils.string_to_time import string_to_time
 from src.thesis_backend.utils.throttle import throttle
 
@@ -67,16 +67,27 @@ class AzureVideoCatalog:
         url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos/{video_id}/Index"
         query_params = {"accessToken": self.__access_token.token}
         response = requests.get(url, params=query_params, headers=self.__headers)
-        return video_index_to_metadata(response.json())
+        return self.video_index_to_metadata(response.json())
+
+    @staticmethod
+    def video_index_to_metadata(video_index: dict) -> MetadataCollection:
+        metadata: list[MetadataSegment] = []
+        transcript = video_index["videos"][0]["insights"].get("transcript", [])
+        for segment in transcript:
+            for instance in segment["instances"]:
+                start = string_to_time(instance["start"])
+                end = string_to_time(instance["end"])
+                metadata.append(MetadataSegment(start, end, segment["text"], segment["confidence"]))
+        return MetadataCollection(metadata)
 
     @property
     def videos(self) -> Mapping[str, VideoStatus]:
         self.__refresh_metadata()
         return self.__videos
 
-    def search(self, query: SearchQuery) -> Sequence[SearchResult]:
+    def search(self, query: str, videos: list[SearchedVideo]) -> Sequence[SearchResult]:
         self.__refresh_metadata()
-        return self.__metadata.search(query)
+        return self.__metadata.search(query, videos)
 
 
 class AzureVideoIndexer:
@@ -97,22 +108,13 @@ class AzureVideoIndexer:
             "description": video_url
         }
         response = requests.post(url, params=query_params, headers=self.__headers).json()
+        if response.get("ErrorType"):
+            raise Exception(response["ErrorType"])
         return VideoStatus(response["id"], video_url, response["state"], response["processingProgress"])
 
     def get_videos_status(self, urls: list[str]) -> Mapping[str, VideoStatus]:
         filtered_videos = {k: v for k, v in self.__video_catalog.videos.items() if k in urls}
         return filtered_videos
 
-    def search(self, query: SearchQuery) -> Sequence[SearchResult]:
-        return self.__video_catalog.search(query)
-
-
-def video_index_to_metadata(video_index: dict) -> MetadataCollection:
-    metadata: list[MetadataSegment] = []
-    transcript = video_index["videos"][0]["insights"].get("transcript", [])
-    for segment in transcript:
-        for instance in segment["instances"]:
-            start = string_to_time(instance["start"])
-            end = string_to_time(instance["end"])
-            metadata.append(MetadataSegment(start, end, segment["text"], segment["confidence"]))
-    return MetadataCollection(metadata)
+    def search(self, query: str, videos: list[SearchedVideo]) -> Sequence[SearchResult]:
+        return self.__video_catalog.search(query, videos)

@@ -29,13 +29,8 @@ class SearchedVideo(NamedTuple):
     end: float
 
 
-class SearchQuery(NamedTuple):
-    text: str
-    videos: list[SearchedVideo]
-
-
 class SearchResult(NamedTuple):
-    video_url: str
+    url: str
     match: MetadataSegment
     confidence: float
 
@@ -50,13 +45,13 @@ class MetadataStore:
     def get_video(self, url: str) -> MetadataCollection | None:
         return self.__collections.get(url, None)
 
-    def search(self, query: SearchQuery) -> Sequence[SearchResult]:
+    def search(self, query: str, videos: list[SearchedVideo]) -> Sequence[SearchResult]:
         """
         Finds matches in all collections using rapidfuzz library, utilizing the Levenshtein distance.
         """
-        search_text = query.text.lower()
+        search_text = query.lower()
         matches: list[SearchResult] = []
-        for collection_query in query.videos:
+        for collection_query in videos:
             collection = self.get_video(collection_query.url)
             if collection is None:
                 continue

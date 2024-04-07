@@ -13,3 +13,23 @@ class AzureMessagePromptSchema(Schema):
 class AzureFunctionPromptSchema(AzureMessagePromptSchema):
     functions = fields.List(fields.Dict())
     tool_choice = fields.Dict()
+
+
+class AzureVideoIndexerIndexSchema(Schema):
+    url = fields.Str(required=True)
+    name = fields.Str(required=True)
+
+
+class AzureVideoIndexerStatusSchema(Schema):
+    urls = fields.List(fields.Str(required=True), required=True)
+
+
+class SearchedVideoSchema(Schema):
+    url = fields.Str(required=True)
+    start = fields.Float(required=True)
+    end = fields.Float(required=True)
+
+
+class AzureVideoIndexerSearchSchema(Schema):
+    query = fields.Str(required=True)
+    videos = fields.List(fields.Nested(SearchedVideoSchema()), required=True)

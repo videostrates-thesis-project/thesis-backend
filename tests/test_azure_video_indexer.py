@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer, AzureVideoIndexerToken, \
     AzureVideoCatalog
-from src.thesis_backend.azure_video_indexer.metadata import SearchQuery, SearchedVideo
+from src.thesis_backend.azure_video_indexer.metadata import SearchedVideo
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
@@ -52,6 +52,12 @@ class TestAzureVideoIndexer(unittest.TestCase):
         assert videos[self.video_big_buck_bunny].state == "Processed"
         assert videos[self.video_big_buck_bunny].progress == 100
 
+    def test_get_video_status_invalid_url(self):
+        azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
+        videos = azure_video_indexer.get_videos_status(["invalid"])
+        assert videos is not None
+        assert len(videos) is 0
+
     def test_upload_video(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
         video_status = azure_video_indexer.upload_video(self.video_big_buck_bunny, self.video_name)
@@ -60,15 +66,22 @@ class TestAzureVideoIndexer(unittest.TestCase):
         assert video_status.url == self.video_big_buck_bunny
         assert isinstance(video_status.state, str)
 
+    def test_upload_video_invalid_url(self):
+        azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
+        # Should raise an exception
+        with self.assertRaises(Exception):
+            azure_video_indexer.upload_video("invalid", self.video_name)
+
     def test_search_videos(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
-        search_query = SearchQuery("fun guys", [SearchedVideo(self.video_sprite_fright, 0, 60)])
-        results = azure_video_indexer.search(search_query)
+        query = "fun guys"
+        videos = [SearchedVideo(self.video_sprite_fright, 0, 60)]
+        results = azure_video_indexer.search(query, videos)
         print(results)
         assert results is not None
         assert len(results) > 0
         for result in results:
-            assert result.video_url == self.video_sprite_fright
+            assert result.url == self.video_sprite_fright
             assert isinstance(result.match.content, str)
             assert isinstance(result.match.start, float)
             assert isinstance(result.match.end, float)
