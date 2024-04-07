@@ -1,90 +1,88 @@
 from __future__ import annotations
 
-import time
-from typing import NamedTuple, Mapping
+from typing import NamedTuple, Mapping, Sequence
 
 import requests
+
+from src.thesis_backend.azure_video_indexer.metadata import MetadataStore, MetadataSegment, MetadataCollection, \
+    SearchQuery, SearchResult
+from src.thesis_backend.utils.string_to_time import string_to_time
+from src.thesis_backend.utils.throttle import throttle
 
 LOCATION = "trial"
 TOKEN_EXPIRATION = 59 * 60  # 59 minutes
 VIDEO_LIST_REFRESH = 1  # 1 second
 
 
-def with_auto_refresh(refresh_func: callable, refresh_interval: int) -> callable:
-    """
-    Decorator performing automatic refresh of the decorated function.
-    Intended to be used for properties that require periodic refresh, such as access tokens.
-    """
-
-    def inner(func: callable) -> callable:
-        def wrapper(self, *args, **kwargs):
-            next_refresh_time = self.__dict__.get("__next_refresh_time")
-            if not next_refresh_time or time.time() > next_refresh_time:
-                refresh_func(self)
-                self.__dict__["__next_refresh_time"] = time.time() + refresh_interval
-            return func(self, *args, **kwargs)
-
-        return wrapper
-
-    return inner
-
-
-class VideoIndexerToken:
+class AzureVideoIndexerToken:
     def __init__(self, account_id: str, primary_key: str) -> None:
         self.__account_id: str = account_id
-        self.__access_token: str = ""
         self.__headers: dict[str, str] = {"Ocp-Apim-Subscription-Key": primary_key}
 
-    def __refresh_access_token(self) -> None:
+    @property
+    @throttle(interval=TOKEN_EXPIRATION)
+    def token(self) -> str:
         url = f"https://api.videoindexer.ai/auth/{LOCATION}/Accounts/{self.__account_id}/AccessToken"
         query_params = {"allowEdit": "true"}
         response = requests.get(url, params=query_params, headers=self.__headers)
-        self.__access_token = response.json()
-
-    @property
-    @with_auto_refresh(refresh_func=__refresh_access_token, refresh_interval=TOKEN_EXPIRATION)
-    def token(self) -> str:
-        return self.__access_token
+        return response.json()
 
 
 class VideoStatus(NamedTuple):
+    id: str
     url: str
     state: str
     progress: int
 
 
 class AzureVideoCatalog:
-    def __init__(self, account_id: str, primary_key: str, access_token: VideoIndexerToken) -> None:
+    def __init__(self, account_id: str, primary_key: str, access_token: AzureVideoIndexerToken) -> None:
         self.__account_id = account_id
         self.__access_token = access_token
         self.__headers = {"Ocp-Apim-Subscription-Key": primary_key}
         self.__videos: Mapping[str, VideoStatus] = {}
+        self.__metadata: MetadataStore = MetadataStore()
 
-    def __refresh_videos(self) -> None:
+    @throttle(interval=VIDEO_LIST_REFRESH)
+    def __refresh_metadata(self) -> None:
         url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos"
         query_params = {"accessToken": self.__access_token.token}
         response = requests.get(url, params=query_params, headers=self.__headers)
-        videos = response.json()["results"]
-        self.__videos = {}
-        for video in videos:
+        videos_response = response.json()["results"]
+        videos = {}
+        for video in videos_response:
+            video_id = video["id"]
             video_url = video["description"]
             video_state = video["state"]
             # Remove '%' from the end of the string and convert to int
             video_progress = int(video["processingProgress"][:-1])
             if video_url:
-                self.__videos[video_url] = (VideoStatus(video_url, video_state, video_progress))
+                videos[video_url] = (VideoStatus(video_id, video_url, video_state, video_progress))
+                if video_state == "Processed" and not self.__metadata.get_video(video_url):
+                    self.__metadata.add_video(video_url, self.__get_video_metadata(video_id))
+        self.__videos: Mapping[str, VideoStatus] = videos
         return
 
+    def __get_video_metadata(self, video_id: str) -> MetadataCollection:
+        url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos/{video_id}/Index"
+        query_params = {"accessToken": self.__access_token.token}
+        response = requests.get(url, params=query_params, headers=self.__headers)
+        return video_index_to_metadata(response.json())
+
     @property
-    @with_auto_refresh(refresh_func=__refresh_videos, refresh_interval=VIDEO_LIST_REFRESH)
     def videos(self) -> Mapping[str, VideoStatus]:
+        self.__refresh_metadata()
         return self.__videos
+
+    def search(self, query: SearchQuery) -> Sequence[SearchResult]:
+        self.__refresh_metadata()
+        return self.__metadata.search(query)
 
 
 class AzureVideoIndexer:
     def __init__(self, account_id: str, primary_key: str) -> None:
         self.__account_id = account_id
-        self.__access_token = VideoIndexerToken(account_id, primary_key)
+        self.__access_token = AzureVideoIndexerToken(account_id, primary_key)
         self.__headers = {"Ocp-Apim-Subscription-Key": primary_key}
         self.__video_catalog = AzureVideoCatalog(account_id, primary_key, self.__access_token)
 
@@ -99,14 +97,22 @@ class AzureVideoIndexer:
             "description": video_url
         }
         response = requests.post(url, params=query_params, headers=self.__headers).json()
-        return VideoStatus(video_url, response["state"], response["processingProgress"])
-
-    def get_video_index(self, video_id: str) -> dict:
-        url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos/{video_id}/Index"
-        query_params = {"accessToken": self.__access_token.token}
-        response = requests.get(url, params=query_params, headers=self.__headers)
-        return response.json()
+        return VideoStatus(response["id"], video_url, response["state"], response["processingProgress"])
 
     def get_videos_status(self, urls: list[str]) -> Mapping[str, VideoStatus]:
         filtered_videos = {k: v for k, v in self.__video_catalog.videos.items() if k in urls}
         return filtered_videos
+
+    def search(self, query: SearchQuery) -> Sequence[SearchResult]:
+        return self.__video_catalog.search(query)
+
+
+def video_index_to_metadata(video_index: dict) -> MetadataCollection:
+    metadata: list[MetadataSegment] = []
+    transcript = video_index["videos"][0]["insights"].get("transcript", [])
+    for segment in transcript:
+        for instance in segment["instances"]:
+            start = string_to_time(instance["start"])
+            end = string_to_time(instance["end"])
+            metadata.append(MetadataSegment(start, end, segment["text"], segment["confidence"]))
+    return MetadataCollection(metadata)

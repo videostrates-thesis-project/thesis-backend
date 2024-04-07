@@ -1,5 +1,7 @@
+import unittest
+
 from src.thesis_backend.azure_video_indexer.metadata import MetadataCollection, MetadataStore, MetadataSegment, \
-    SearchQuery, SearchedCollection
+    SearchQuery, SearchedVideo
 
 COLLECTION_1 = [
     MetadataSegment(3.2, 8.32, "Oh, you cute little corny, was person that name bonus point."),
@@ -18,31 +20,28 @@ COLLECTION_2 = [
 ]
 
 
-def test_add_get_collection():
-    metadata_store = MetadataStore()
-    metadata_collection_1 = MetadataCollection(COLLECTION_1)
-    metadata_collection_2 = MetadataCollection(COLLECTION_2)
-    metadata_store.add_collection("Sprite Fright 1", metadata_collection_1)
-    metadata_store.add_collection("Sprite Fright 2", metadata_collection_2)
-    assert metadata_store.get_collection("Sprite Fright 1") == metadata_collection_1
-    assert metadata_store.get_collection("Sprite Fright 2") == metadata_collection_2
+class TestMetadata(unittest.TestCase):
+    def setUp(self) -> None:
+        self.metadata_store = MetadataStore()
+        self.metadata_collection_1 = MetadataCollection(COLLECTION_1)
+        self.metadata_collection_2 = MetadataCollection(COLLECTION_2)
+        self.metadata_store.add_video("sprite_fright_1_url", self.metadata_collection_1)
+        self.metadata_store.add_video("sprite_fright_2_url", self.metadata_collection_2)
 
+    def test_get_collection(self):
+        assert self.metadata_store.get_video("sprite_fright_1_url") == self.metadata_collection_1
+        assert self.metadata_store.get_video("sprite_fright_2_url") == self.metadata_collection_2
 
-def test_search():
-    metadata_store = MetadataStore()
-    metadata_collection_1 = MetadataCollection(COLLECTION_1)
-    metadata_collection_2 = MetadataCollection(COLLECTION_2)
-    metadata_store.add_collection("Sprite Fright 1", metadata_collection_1)
-    metadata_store.add_collection("Sprite Fright 2", metadata_collection_2)
-    search_query = SearchQuery("fun guys", [SearchedCollection("Sprite Fright 1", 0, 60),
-                                            SearchedCollection("Sprite Fright 2", 0, 60)])
-    search_results = metadata_store.search(search_query)
-    print(search_results)
-    assert len(search_results) == 2
-    assert search_results[0].collection == "Sprite Fright 2"
-    assert search_results[0].match.content == COLLECTION_2[1].content.lower()
-    assert search_results[0].confidence == 100
+    def test_search(self):
+        search_query = SearchQuery("fun guys", [SearchedVideo("sprite_fright_1_url", 0, 60),
+                                                SearchedVideo("sprite_fright_2_url", 0, 60)])
+        search_results = self.metadata_store.search(search_query)
+        print(search_results)
+        assert len(search_results) == 2
+        assert search_results[0].video_url == "sprite_fright_2_url"
+        assert search_results[0].match.content == COLLECTION_2[1].content.lower()
+        assert search_results[0].confidence == 1
 
-    assert search_results[1].collection == "Sprite Fright 2"
-    assert search_results[1].match.content == COLLECTION_2[3].content.lower()
-    assert search_results[1].confidence == 100
+        assert search_results[1].video_url == "sprite_fright_2_url"
+        assert search_results[1].match.content == COLLECTION_2[3].content.lower()
+        assert search_results[1].confidence == 1

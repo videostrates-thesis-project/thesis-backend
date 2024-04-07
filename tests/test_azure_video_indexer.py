@@ -3,8 +3,9 @@ import unittest
 
 from dotenv import load_dotenv
 
-from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer, VideoIndexerToken, \
+from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer, AzureVideoIndexerToken, \
     AzureVideoCatalog
+from src.thesis_backend.azure_video_indexer.metadata import SearchQuery, SearchedVideo
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
@@ -13,18 +14,20 @@ class TestAzureVideoIndexer(unittest.TestCase):
     def setUp(self):
         self.account_id = os.environ.get("VIDEO_INDEXER_ACCOUNT_ID")
         self.primary_key = os.environ.get("VIDEO_INDEXER_PRIMARY_KEY")
-        self.video_url = "https://storage.googleapis.com/videostrates.appspot.com/files/f90454fd-1616-4845-8252-f2978bab22a7.mp4"
+        self.video_big_buck_bunny = "https://storage.googleapis.com/videostrates.appspot.com/files/f90454fd-1616-4845-8252-f2978bab22a7.mp4"
+        self.video_sprite_fright = "https://storage.googleapis.com/videostrates.appspot.com/files/1f4c33d5-b98b-45ea-81e2-1e10ef14ace7.mp4"
         self.video_name = "test_video"
         self.video_id = "84505873fd"
 
     def test_get_access_token(self):
-        azure_token = VideoIndexerToken(self.account_id, self.primary_key)
+        azure_token = AzureVideoIndexerToken(self.account_id, self.primary_key)
         token = azure_token.token
+        print(token)
         assert token is not None
         assert isinstance(token, str)
 
     def test_video_catalog(self):
-        azure_token = VideoIndexerToken(self.account_id, self.primary_key)
+        azure_token = AzureVideoIndexerToken(self.account_id, self.primary_key)
         video_catalog = AzureVideoCatalog(self.account_id, self.primary_key, azure_token)
         videos = video_catalog.videos
         assert videos is not None
@@ -42,25 +45,32 @@ class TestAzureVideoIndexer(unittest.TestCase):
 
     def test_get_video_status(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
-        videos = azure_video_indexer.get_videos_status([self.video_url])
+        videos = azure_video_indexer.get_videos_status([self.video_big_buck_bunny])
         assert videos is not None
         assert len(videos) is 1
-        assert videos[self.video_url].url == self.video_url
-        assert videos[self.video_url].state == "Processed"
-        assert videos[self.video_url].progress == 100
+        assert videos[self.video_big_buck_bunny].url == self.video_big_buck_bunny
+        assert videos[self.video_big_buck_bunny].state == "Processed"
+        assert videos[self.video_big_buck_bunny].progress == 100
 
     def test_upload_video(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
-        video_status = azure_video_indexer.upload_video(self.video_url, self.video_name)
+        video_status = azure_video_indexer.upload_video(self.video_big_buck_bunny, self.video_name)
         assert video_status is not None
         assert isinstance(video_status, tuple)
-        assert video_status.url == self.video_url
+        assert video_status.url == self.video_big_buck_bunny
         assert isinstance(video_status.state, str)
 
-    def test_get_video_index(self):
+    def test_search_videos(self):
         azure_video_indexer = AzureVideoIndexer(self.account_id, self.primary_key)
-        response = azure_video_indexer.get_video_index(self.video_id)
-        assert response is not None
-        assert isinstance(response, dict)
-        assert "id" in response
-        assert response["id"] == self.video_id
+        search_query = SearchQuery("fun guys", [SearchedVideo(self.video_sprite_fright, 0, 60)])
+        results = azure_video_indexer.search(search_query)
+        print(results)
+        assert results is not None
+        assert len(results) > 0
+        for result in results:
+            assert result.video_url == self.video_sprite_fright
+            assert isinstance(result.match.content, str)
+            assert isinstance(result.match.start, float)
+            assert isinstance(result.match.end, float)
+            assert isinstance(result.confidence, float)
+            assert 0 <= result.confidence <= 1
