@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def string_to_time(time_str: str) -> float:
+def time_str_to_seconds(time_str: str) -> float:
     if len(time_str) == 7:  # Format: '0:00:23'
         time_obj = datetime.strptime(time_str, "%H:%M:%S")
     elif len(time_str) in [9, 10]:  # Format: '0:00:32.36' or '0:00:32.3'

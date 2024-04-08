@@ -72,8 +72,7 @@ class TestAPI(unittest.TestCase):
     def test_get_videos_status_invalid_request(self):
         # Define invalid request data (missing 'urls' field)
         request_data = {"url": ["example_url"]}
-        response = self.client.get("/azure_video_indexer/status", json=request_data)
-
+        response = self.client.post("/azure_video_indexer/status", json=request_data)
         assert response.status_code == 400
         assert "urls" in json.loads(response.data)["error"]
 

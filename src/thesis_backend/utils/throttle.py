@@ -16,7 +16,7 @@ def make_key(args: tuple, kwargs: dict) -> str:
 def throttle(interval: int) -> callable:
     """
     Decorator throttling the function calls. It caches the result of the function for a specified interval.
-    Intended to be throttle the number of requests to the Azure Video Indexer API.
+    Intended to throttle the number of requests to the Azure Video Indexer API.
     """
 
     def decorator(func: callable) -> callable:
@@ -32,7 +32,9 @@ def throttle(interval: int) -> callable:
             result = func(*args, **kwargs)
             cache[key] = CacheEntry(result, time.time() + interval)
             return result
-
+        # Expose a method to clear cache - useful for tests, because the key is based on the memory address,
+        # which can repeat in different tests, and since the cache is shared between tests, it can cause weird behaviour
+        wrapper.cache_reset = lambda: cache.clear()
         return wrapper
 
     return decorator
