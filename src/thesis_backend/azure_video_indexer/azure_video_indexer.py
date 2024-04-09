@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Mapping, Sequence
+from typing import Mapping
 from src.thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus, \
     ErrorResponse
-from src.thesis_backend.azure_video_indexer.metadata import MetadataStore, SearchResult, SearchedVideo, \
-    MetadataCollection, MetadataSegment
+from src.thesis_backend.azure_video_indexer.metadata import MetadataStore, SearchedVideo, \
+    MetadataCollection, MetadataSegment, SearchResults
 from src.thesis_backend.utils.throttle import throttle
 
 VIDEO_LIST_REFRESH_RATE = 10  # 10 seconds
@@ -35,7 +35,7 @@ class AzureVideoCatalog:
     def add_video(self, video_status: VideoStatus) -> None:
         self.__videos = self.__videos | {video_status.url: video_status}
 
-    def search(self, query: str, videos: list[SearchedVideo]) -> Sequence[SearchResult]:
+    def search(self, query: str, videos: list[SearchedVideo]) -> SearchResults:
         self.__refresh_metadata()
         return self.__metadata.search(query, videos)
 
@@ -55,7 +55,7 @@ class AzureVideoIndexer:
         filtered_videos = {k: v for k, v in self.__video_catalog.videos.items() if k in urls}
         return filtered_videos
 
-    def search(self, query: str, videos: list[SearchedVideo]) -> Sequence[SearchResult]:
+    def search(self, query: str, videos: list[SearchedVideo]) -> SearchResults:
         return self.__video_catalog.search(query, videos)
 
 

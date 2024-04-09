@@ -5,7 +5,7 @@ import os
 from flask import Blueprint
 
 from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer
-from src.thesis_backend.azure_video_indexer.metadata import SearchedVideo
+from src.thesis_backend.azure_video_indexer.metadata import SearchedVideo, Match
 from src.thesis_backend.schema import AzureVideoIndexerIndexSchema, AzureVideoIndexerStatusSchema, \
     AzureVideoIndexerSearchSchema
 from src.thesis_backend.utils.with_request_data import with_request_data
@@ -41,7 +41,7 @@ def get_videos_status(request_data) -> tuple[dict[str, dict[str, str]], int] | t
     return response, 200
 
 
-@bp.get("/azure_video_indexer/search")
+@bp.post("/azure_video_indexer/search")
 @with_request_data(AzureVideoIndexerSearchSchema())
 def search_videos(request_data) -> tuple[list[dict[str, str | dict]], int] | tuple[dict[str, str], int]:
     videos = [SearchedVideo(**video) for video in request_data.get("videos")]
@@ -49,6 +49,6 @@ def search_videos(request_data) -> tuple[list[dict[str, str | dict]], int] | tup
         matches = azure_video_indexer.search(request_data.get("query"), videos)
     except Exception as e:
         return {"error": "Failed to search videos", "message": str(e)}, 500
-
-    response = [{**video._asdict(), "match": video.match._asdict()} for video in matches]
+    m: Match
+    response = {url: [m._asdict() for m in video_match] for url, video_match in matches.items()}
     return response, 200
