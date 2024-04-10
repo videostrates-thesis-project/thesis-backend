@@ -34,6 +34,7 @@ def generate_function_call(
         tools=functions,
         tool_choice=tool_choice,
         temperature=0.25,
+        max_tokens=4096,
     )
 
     tool_calls = completion.choices[0].message.tool_calls
@@ -51,6 +52,7 @@ def generate_message(
         model=model,
         messages=messages,
         temperature=0.25,
+        max_tokens=4096,
     )
 
     response = completion.choices[0].message.content
