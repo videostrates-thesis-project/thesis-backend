@@ -21,6 +21,11 @@ class TestAPI(TestCaseWithMockedRequests, unittest.TestCase):
         assert video["state"] == "Uploaded"
         assert video["progress"] == 1
 
+    def test_upload_video_invalid_url(self):
+        request_data = {"url": self.invalid_video_url, "name": "example_name"}
+        response = self.client.post("/azure_video_indexer/index", json=request_data)
+        assert response.status_code == 500
+
     def test_get_videos_status(self):
         request_data = {"urls": [self.existing_video_url]}
         response = self.client.post("/azure_video_indexer/status", json=request_data)
@@ -48,7 +53,9 @@ class TestAPI(TestCaseWithMockedRequests, unittest.TestCase):
             for match in result:
                 assert isinstance(match["start"], float)
                 assert isinstance(match["end"], float)
-                assert isinstance(match["content"], str)
+                assert isinstance(match["text"], str)
+                assert isinstance(match["after_text"], str)
+                assert isinstance(match["before_text"], str)
                 assert isinstance(match["highlighted"], str)
                 assert isinstance(match["confidence"], float)
                 assert 0 <= match["confidence"] <= 1

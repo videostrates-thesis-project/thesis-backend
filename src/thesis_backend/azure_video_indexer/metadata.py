@@ -7,7 +7,7 @@ from rapidfuzz import fuzz
 from rapidfuzz.distance import ScoreAlignment
 from sortedcontainers import SortedKeyList
 
-SEARCH_SCORE_CUTOFF: Final[int] = 80
+SEARCH_SCORE_CUTOFF: Final[int] = 90
 
 
 class MetadataSegment(NamedTuple):
@@ -36,7 +36,9 @@ class SearchedVideo(NamedTuple):
 class Match(NamedTuple):
     start: float
     end: float
-    content: str
+    text: str
+    before_text: str
+    after_text: str
     highlighted: str
     confidence: float
 
@@ -46,9 +48,11 @@ class SearchResults(defaultdict[str, SortedKeyList[Match]]):
     def empty() -> SearchResults:
         return SearchResults(lambda: SortedKeyList(key=lambda x: -x.confidence))
 
-    def add_match(self, url, segment: MetadataSegment, fuzz_result: ScoreAlignment) -> None:
+    def add_match(self, url, segment: MetadataSegment, fuzz_result: ScoreAlignment, before_text: str,
+                  after_text: str) -> None:
         highlighted_content = self.__highlight_match(segment.content, fuzz_result.src_start, fuzz_result.src_end)
-        match = Match(segment.start, segment.end, segment.content, highlighted_content, fuzz_result.score / 100)
+        match = Match(segment.start, segment.end, segment.content, before_text, after_text, highlighted_content,
+                      fuzz_result.score / 100)
         self[url].add(match)
 
     @staticmethod
@@ -76,8 +80,10 @@ class MetadataStore:
             collection = self.get_video(collection_query.url)
             if collection is None:
                 continue
-            for segment in collection.data:
+            for index, segment in enumerate(collection.data):
                 result = fuzz.partial_ratio_alignment(segment.content, search_text, score_cutoff=SEARCH_SCORE_CUTOFF)
                 if result is not None:
-                    matches.add_match(collection_query.url, segment, result)
+                    before_text = collection.data[index - 1].content if index > 0 else ""
+                    after_text = collection.data[index + 1].content if index + 1 < len(collection.data) else ""
+                    matches.add_match(collection_query.url, segment, result, before_text, after_text)
         return matches

@@ -25,7 +25,6 @@ def upload_video(request_data) -> tuple[dict[str, str], int]:
         video_status = azure_video_indexer.upload_video(request_data.get("url"), request_data.get("name"))
     except Exception as e:
         return {"error": "Failed to upload video", "message": str(e)}, 500
-
     return video_status._asdict(), 200
 
 

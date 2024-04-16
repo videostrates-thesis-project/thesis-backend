@@ -39,10 +39,10 @@ class TestMetadata(unittest.TestCase):
         assert len(search_results.keys()) == 1
         assert search_results["sprite_fright_2_url"] is not None
         assert len(search_results["sprite_fright_2_url"]) == 2
-        assert search_results["sprite_fright_2_url"][0].content == COLLECTION_2[1].content.lower()
+        assert search_results["sprite_fright_2_url"][0].text == COLLECTION_2[1].content.lower()
         assert search_results["sprite_fright_2_url"][0].confidence == 1
 
-        assert search_results["sprite_fright_2_url"][1].content == COLLECTION_2[3].content.lower()
+        assert search_results["sprite_fright_2_url"][1].text == COLLECTION_2[3].content.lower()
         assert search_results["sprite_fright_2_url"][1].confidence == 0.875
 
     def test_search_results_sorted(self):
@@ -52,8 +52,8 @@ class TestMetadata(unittest.TestCase):
         assert search_results["sprite_fright_2_url"] is not None
         assert len(search_results["sprite_fright_2_url"]) == 2
         # The order of the results is opposite to the order of the collection
-        assert search_results["sprite_fright_2_url"][0].content == COLLECTION_2[3].content.lower()
+        assert search_results["sprite_fright_2_url"][0].text == COLLECTION_2[3].content.lower()
         assert search_results["sprite_fright_2_url"][0].confidence == 1
 
-        assert search_results["sprite_fright_2_url"][1].content == COLLECTION_2[1].content.lower()
+        assert search_results["sprite_fright_2_url"][1].text == COLLECTION_2[1].content.lower()
         assert 0.86 > search_results["sprite_fright_2_url"][1].confidence > 0.85
