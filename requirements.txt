@@ -14,13 +14,19 @@
 # pytorch
 
 ### Backend ###
-flask
+flask~=3.0.2
 # gunicorn
 
 ### Other ###
 python-dotenv==1.0.1
-openai
-vertexai
-marshmallow
+openai~=1.13.3
+vertexai~=1.43.0
+marshmallow~=3.21.1
 
 
+
+requests~=2.31.0
+pip~=21.2.4
+setuptools~=58.1.0
+rapidfuzz~=3.8.0
+sortedcontainers~=2.4.0

@@ -3,6 +3,9 @@ import os
 import flask
 from flask import Flask
 from dotenv import load_dotenv
+
+from src.thesis_backend.api import azure_video_indexer
+
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
 from thesis_backend.api import llm
@@ -12,6 +15,7 @@ app.config["DEBUG"] = True
 
 # Register blueprints
 app.register_blueprint(llm.bp)
+app.register_blueprint(azure_video_indexer.bp)
 
 
 @app.route("/", methods=["GET"])
