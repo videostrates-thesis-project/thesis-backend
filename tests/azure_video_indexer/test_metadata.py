@@ -1,6 +1,6 @@
 import unittest
 
-from src.thesis_backend.azure_video_indexer.metadata import MetadataCollection, MetadataStore, MetadataSegment, \
+from thesis_backend.azure_video_indexer.metadata import MetadataCollection, MetadataStore, MetadataSegment, \
     SearchedVideo, SearchResults
 
 COLLECTION_1 = [

@@ -4,11 +4,11 @@ import os
 
 from flask import Blueprint
 
-from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer
-from src.thesis_backend.azure_video_indexer.metadata import SearchedVideo, Match
-from src.thesis_backend.schema import AzureVideoIndexerIndexSchema, AzureVideoIndexerStatusSchema, \
+from thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoIndexer
+from thesis_backend.azure_video_indexer.metadata import SearchedVideo, Match
+from thesis_backend.schema import AzureVideoIndexerIndexSchema, AzureVideoIndexerStatusSchema, \
     AzureVideoIndexerSearchSchema
-from src.thesis_backend.utils.with_request_data import with_request_data
+from thesis_backend.utils.with_request_data import with_request_data
 
 bp = Blueprint("azure_video_indexer", __name__)
 

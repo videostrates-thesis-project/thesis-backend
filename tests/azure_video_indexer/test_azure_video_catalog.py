@@ -1,8 +1,8 @@
 import unittest
 from typing import Mapping
 
-from src.thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoCatalog
-from src.thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus
+from thesis_backend.azure_video_indexer.azure_video_indexer import AzureVideoCatalog
+from thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus
 from tests.azure_video_indexer.test_case_with_mocked_requests import TestCaseWithMockedRequests
 
 

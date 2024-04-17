@@ -1,6 +1,6 @@
 import unittest
 from flask import Flask, json
-from src.thesis_backend.api.azure_video_indexer import bp
+from thesis_backend.api.azure_video_indexer import bp
 from tests.azure_video_indexer.test_case_with_mocked_requests import TestCaseWithMockedRequests
 
 

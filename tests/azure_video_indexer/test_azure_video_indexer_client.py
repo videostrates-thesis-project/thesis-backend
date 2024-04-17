@@ -1,5 +1,5 @@
 import unittest
-from src.thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus, \
+from thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus, \
     ErrorResponse, VideoMetadata, VideoList
 from tests.azure_video_indexer.test_case_with_mocked_requests import TestCaseWithMockedRequests
 
