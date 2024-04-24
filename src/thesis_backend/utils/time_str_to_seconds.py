@@ -7,7 +7,6 @@ def time_str_to_seconds(time_str: str) -> float:
     elif len(time_str) > 8:  # Format: '0:00:32.36' or '0:00:32.3' or '0:00:32.3666667'
         if len(time_str) > 10:
             time_str = time_str[:10]
-        print(f"Time string: {time_str}")
         time_obj = datetime.strptime(time_str, "%H:%M:%S.%f")
     else:
         print(f"Invalid time format: {time_str}")
