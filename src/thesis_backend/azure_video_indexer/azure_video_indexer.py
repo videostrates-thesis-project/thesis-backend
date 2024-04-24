@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import Mapping
-from src.thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus, \
+from thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus, \
     ErrorResponse
-from src.thesis_backend.azure_video_indexer.metadata import MetadataStore, SearchedVideo, \
+from thesis_backend.azure_video_indexer.metadata import MetadataStore, SearchedVideo, \
     MetadataCollection, MetadataSegment, SearchResults
-from src.thesis_backend.utils.throttle import throttle
+from thesis_backend.utils.throttle import throttle
 
 VIDEO_LIST_REFRESH_RATE = 10  # 10 seconds
 

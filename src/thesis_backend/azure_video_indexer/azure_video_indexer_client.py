@@ -2,8 +2,8 @@ from __future__ import annotations
 import requests
 from collections import UserDict
 from typing import Mapping, NamedTuple
-from src.thesis_backend.utils.throttle import throttle
-from src.thesis_backend.utils.time_str_to_seconds import time_str_to_seconds
+from thesis_backend.utils.throttle import throttle
+from thesis_backend.utils.time_str_to_seconds import time_str_to_seconds
 
 LOCATION = "trial"
 TOKEN_EXPIRATION = 59 * 60  # 59 minutes

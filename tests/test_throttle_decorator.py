@@ -1,7 +1,7 @@
 import unittest
 import time
 
-from src.thesis_backend.utils.throttle import throttle
+from thesis_backend.utils.throttle import throttle
 
 
 class TestClass:

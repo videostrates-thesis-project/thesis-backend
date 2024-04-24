@@ -1,11 +1,11 @@
 from flask import Blueprint
 
-from src.thesis_backend.llm.azure_openai_completion import (
+from thesis_backend.llm.azure_openai_completion import (
     generate_function_call,
     generate_image,
     generate_message,
 )
-from src.thesis_backend.llm.gemini_completion import (
+from thesis_backend.llm.gemini_completion import (
     gemini_generate_message, gemini_generate_function_call
 )
 from ..schema import (

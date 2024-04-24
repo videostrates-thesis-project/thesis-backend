@@ -1,7 +1,7 @@
 import os
 import unittest
 from dotenv import load_dotenv
-from src.thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus
+from thesis_backend.azure_video_indexer.azure_video_indexer_client import AzureVideoIndexerClient, VideoStatus
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 

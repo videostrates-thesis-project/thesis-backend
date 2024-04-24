@@ -1,5 +1,5 @@
 import unittest
-from src.thesis_backend.utils.time_str_to_seconds import time_str_to_seconds
+from thesis_backend.utils.time_str_to_seconds import time_str_to_seconds
 
 
 class TestStringToTime(unittest.TestCase):

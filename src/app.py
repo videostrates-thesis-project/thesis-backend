@@ -4,7 +4,7 @@ import flask
 from flask import Flask
 from dotenv import load_dotenv
 
-from src.thesis_backend.api import azure_video_indexer
+from thesis_backend.api import azure_video_indexer
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
