@@ -98,6 +98,8 @@ class AzureVideoIndexerClient:
         }
         response = requests.post(url, params=query_params, headers=self.__headers).json()
         if response.get("ErrorType"):
+            print("ERROR in index_video")
+            print(response)
             return ErrorResponse.from_response(response)
 
         return VideoStatus.from_response(response)
@@ -107,6 +109,8 @@ class AzureVideoIndexerClient:
         query_params = {"accessToken": self.__access_token}
         response = requests.get(url, params=query_params, headers=self.__headers).json()
         if response.get("ErrorType"):
+            print("ERROR in get_videos")
+            print(response)
             return ErrorResponse.from_response(response)
         return VideoList.from_response(response)
 
@@ -115,5 +119,7 @@ class AzureVideoIndexerClient:
         query_params = {"accessToken": self.__access_token}
         response = requests.get(url, params=query_params, headers=self.__headers).json()
         if response.get("ErrorType"):
+            print("ERROR in get_video_metadata")
+            print(response)
             return ErrorResponse.from_response(response)
         return VideoMetadata.from_response(response)

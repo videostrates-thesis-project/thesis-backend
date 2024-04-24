@@ -61,4 +61,5 @@ class AzureVideoIndexer:
 
 def raise_if_error(response: any) -> None:
     if isinstance(response, ErrorResponse):
+        print("raise_if_error ", response)
         raise Exception(f"{response.error_type}: {response.message}")
