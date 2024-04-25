@@ -16,6 +16,10 @@ account_id = os.environ.get("VIDEO_INDEXER_ACCOUNT_ID")
 primary_key = os.environ.get("VIDEO_INDEXER_PRIMARY_KEY")
 
 azure_video_indexer = AzureVideoIndexer(account_id, primary_key)
+if account_id is not None:
+    print("Initializing Azure Video Indexer...")
+    azure_video_indexer.get_videos_status([])
+    print("Azure Video Indexer initialized")
 
 
 @bp.post("/azure_video_indexer/index")

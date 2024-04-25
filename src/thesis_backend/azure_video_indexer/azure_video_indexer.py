@@ -6,7 +6,7 @@ from thesis_backend.azure_video_indexer.metadata import MetadataStore, SearchedV
     MetadataCollection, MetadataSegment, SearchResults
 from thesis_backend.utils.throttle import throttle
 
-VIDEO_LIST_REFRESH_RATE = 10  # 10 seconds
+VIDEO_LIST_REFRESH_RATE = 20  # 10 seconds
 
 
 class AzureVideoCatalog:

@@ -106,7 +106,7 @@ class AzureVideoIndexerClient:
 
     def get_videos(self) -> VideoList | ErrorResponse:
         url = f"https://api.videoindexer.ai/{LOCATION}/Accounts/{self.__account_id}/Videos"
-        query_params = {"accessToken": self.__access_token}
+        query_params = {"accessToken": self.__access_token, "pageSize": 1000}
         response = requests.get(url, params=query_params, headers=self.__headers).json()
         if response.get("ErrorType"):
             print("ERROR in get_videos")
